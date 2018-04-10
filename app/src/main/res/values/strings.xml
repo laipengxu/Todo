@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">Todo</string>
+    <string name="have_something_todo">有什么待办事项呢?</string>
+    <string name="empty">没有待办事项</string>
+    <string name="closure_todo">结束待办事项</string>
+    <string name="cancel">取消</string>
+    <string name="continues">继续</string>
+    <string name="closure">结束</string>
+</resources>
