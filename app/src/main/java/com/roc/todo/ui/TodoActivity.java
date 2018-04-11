@@ -78,7 +78,7 @@ public class TodoActivity extends AppCompatActivity implements View.OnClickListe
                 );
     }
 
-    private void initData() {
+    public void initData() {
         mSwipeRefreshLayout.setRefreshing(true);
         List<TodoBean> allTodo = getAllTodo();
         if (allTodo.size() > 0) {

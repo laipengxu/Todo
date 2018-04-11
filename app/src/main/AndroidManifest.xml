@@ -15,7 +15,7 @@
         <activity
             android:name=".ui.TodoActivity"
             android:excludeFromRecents="true"
-            android:windowSoftInputMode="adjustResize|stateHidden">
+            android:windowSoftInputMode="adjustResize|stateHidden|stateAlwaysHidden">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
 

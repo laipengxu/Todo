@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.support.v4.app.NotificationCompat;
 
 import com.roc.todo.R;
+import com.roc.todo.application.TodoApplication;
 import com.roc.todo.ui.ClosureTodoActivity;
 import com.roc.todo.utils.SPUtils;
 
@@ -67,5 +68,36 @@ public class TodoManager {
 
         // 保存记录
         SPUtils.putString(String.valueOf(randomID), todoContent);
+    }
+
+    public void updateTodoNotification(Context context, int id, String newContent) {
+        // 系统通知管理者
+        NotificationManager notificationManager =
+                (NotificationManager) TodoApplication.getInstance().getSystemService(Context.NOTIFICATION_SERVICE);
+
+        // 创建通知
+        Intent intent = new Intent(context, ClosureTodoActivity.class);
+        intent.putExtra(EXTRA_RANDOM_ID, id);
+        intent.putExtra(EXTRA_TODO_CONTENT, newContent);
+        PendingIntent pendingIntent =
+                PendingIntent.getActivity(context, id, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        Notification todoNotification = new NotificationCompat
+                .Builder(context)
+                .setContentTitle(newContent)
+                .setContentText("点击结束待办事项")
+                .setSmallIcon(R.mipmap.ic_launcher)
+                .setContentIntent(pendingIntent)
+                .build();
+        todoNotification.flags |= Notification.FLAG_NO_CLEAR;
+
+        // 发送通知
+        notificationManager.notify(
+                id,
+                todoNotification
+        );
+
+        // 保存记录
+        SPUtils.putString(String.valueOf(id), newContent);
     }
 }

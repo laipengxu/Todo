@@ -1,16 +1,23 @@
 package com.roc.todo.adapters;
 
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.roc.todo.R;
 import com.roc.todo.entity.TodoBean;
+import com.roc.todo.libs.qmui.widget.dialog.QMUIDialog;
+import com.roc.todo.libs.qmui.widget.dialog.QMUIDialogAction;
 import com.roc.todo.managers.TodoManager;
 import com.roc.todo.ui.ClosureTodoActivity;
+import com.roc.todo.ui.TodoActivity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,20 +56,81 @@ public class TodoAdapter extends RecyclerView.Adapter {
             tv_todo_content = (TextView) itemView.findViewById(R.id.tv_todo_content);
             itemView.setOnLongClickListener(new View.OnLongClickListener() {
                 @Override
-                public boolean onLongClick(View v) {
-                    TodoBean todoBean = mData.get(getAdapterPosition());
-                    int id = todoBean.getId();
-                    String todoContent = todoBean.getTodoContent();
-                    Intent intent = new Intent(v.getContext(), ClosureTodoActivity.class);
-                    intent.putExtra(TodoManager.EXTRA_RANDOM_ID, id);
-                    intent.putExtra(TodoManager.EXTRA_TODO_CONTENT, todoContent);
-                    v.getContext().startActivity(intent);
+                public boolean onLongClick(final View v) {
+                    // 弹出操作对话框
+                    new QMUIDialog.MenuDialogBuilder(v.getContext())
+                            .addItem("修改事件", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    editTodo(v.getContext());
+                                    dialog.dismiss();
+                                }
+                            })
+                            .addItem("结束事件", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    deleteTodo(v.getContext());
+                                    dialog.dismiss();
+                                }
+                            })
+                            .show();
                     return true;
                 }
+
+
             });
         }
 
-        public void setupData(TodoBean todoBean) {
+        /**
+         * 编辑修改
+         *
+         * @param context
+         */
+        private void editTodo(Context context) {
+            TodoBean todoBean = mData.get(getAdapterPosition());
+            String todoContent = todoBean.getTodoContent();
+            final QMUIDialog.EditTextDialogBuilder builder = new QMUIDialog.EditTextDialogBuilder(context)
+                    .setTitle("修改")
+                    .setDefaultText(todoContent)
+                    .setCanceledOnTouchOutside(false);
+            builder.addAction("取消", new QMUIDialogAction.ActionListener() {
+                @Override
+                public void onClick(QMUIDialog dialog, int index) {
+                    dialog.dismiss();
+                }
+            });
+            builder.addAction("确定修改", new QMUIDialogAction.ActionListener() {
+                @Override
+                public void onClick(QMUIDialog dialog, int index) {
+                    EditText editText = builder.getEditText();
+                    TodoBean todoBean = mData.get(getAdapterPosition());
+                    if (dialog.getBaseContext() instanceof TodoActivity) {
+                        TodoManager.getInstance().updateTodoNotification(dialog.getBaseContext(), todoBean.getId(), editText.getText().toString().trim());
+                        ((TodoActivity) dialog.getBaseContext()).initData();
+                        Toast.makeText(dialog.getBaseContext(), "修改完成", Toast.LENGTH_SHORT).show();
+                    }
+                    dialog.dismiss();
+                }
+            });
+            builder.show();
+        }
+
+        /**
+         * 删除
+         *
+         * @param context
+         */
+        private void deleteTodo(Context context) {
+            TodoBean todoBean = mData.get(getAdapterPosition());
+            int id = todoBean.getId();
+            String todoContent = todoBean.getTodoContent();
+            Intent intent = new Intent(context, ClosureTodoActivity.class);
+            intent.putExtra(TodoManager.EXTRA_RANDOM_ID, id);
+            intent.putExtra(TodoManager.EXTRA_TODO_CONTENT, todoContent);
+            context.startActivity(intent);
+        }
+
+        void setupData(TodoBean todoBean) {
             if (todoBean != null) {
                 tv_todo_content.setText(todoBean.getTodoContent());
             }

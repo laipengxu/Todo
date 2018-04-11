@@ -16,6 +16,9 @@ allprojects {
     repositories {
         jcenter()
     }
+    ext {
+        supportVersion = "25.+"
+    }
 }
 
 task clean(type: Delete) {
